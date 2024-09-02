@@ -180,11 +180,11 @@ export default function ImageConverter() {
               >
                 Download
               </a>
-              <p className="text-sm text-[#e21d48]">
+              {/* <p className="text-sm text-[#e21d48]">
                 Size reduction: {originalSize && convertedSize
                   ? `${((1 - (parseInt(convertedSize) / parseInt(originalSize))) * 100).toFixed(2)}%`
                   : 'N/A'}
-              </p>
+              </p> */}
             </div>
           </div>
         )}
