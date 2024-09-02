@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import imageCompression from 'browser-image-compression'
 import Hero from './Hero'
 import { AiFillPicture, AiOutlineLoading } from "react-icons/ai";
@@ -32,8 +31,6 @@ export default function ImageConverter() {
   const [convertedSize, setConvertedSize] = useState<string>('')
   const [manualWidth, setManualWidth] = useState<string>('')
   const [manualHeight, setManualHeight] = useState<string>('')
-  const [isCompressing, setIsCompressing] = useState<boolean>(false)
-  const [compressionLevel, setCompressionLevel] = useState<number>(5)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const imageRef = useRef<HTMLImageElement>(null)
 
@@ -55,7 +52,7 @@ export default function ImageConverter() {
     if (!selectedImage) return
 
     const options = {
-      maxSizeMB: isCompressing ? compressionLevel : Infinity,
+      maxSizeMB: 0.9, // 900KB limit
       maxWidthOrHeight: Math.max(
         manualWidth ? parseInt(manualWidth) : Infinity,
         manualHeight ? parseInt(manualHeight) : Infinity
@@ -76,8 +73,9 @@ export default function ImageConverter() {
       setIsLoading(false)
     } catch (error) {
       console.error('Error converting image:', error)
+      setIsLoading(false)
     }
-  }, [selectedImage, format, quality, manualWidth, manualHeight, isCompressing, compressionLevel])
+  }, [selectedImage, format, quality, manualWidth, manualHeight])
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -163,30 +161,6 @@ export default function ImageConverter() {
               onChange={(e) => setManualHeight(e.target.value)}
             />
           </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Switch
-              className='bg-[#e21d48]'
-              id="compress-mode"
-              checked={isCompressing}
-              onCheckedChange={setIsCompressing}
-            />
-            <Label htmlFor="compress-mode">Enable Compression</Label>
-          </div>
-          {isCompressing && (
-            <div>
-              <Label htmlFor="compression-level">Compression Level: {compressionLevel} MB</Label>
-              <Slider
-                id="compression-level"
-                min={1}
-                max={10}
-                step={1}
-                value={[compressionLevel]}
-                onValueChange={(value) => setCompressionLevel(value[0])}
-              />
-            </div>
-          )}
         </div>
         <Button onClick={handleConvert} disabled={!selectedImage}>
           {isLoading ? <><AiOutlineLoading className='mr-2 h-4 w-4 animate-spin' />Converting...</> : <>Convert</>}
