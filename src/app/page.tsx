@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import imageCompression from 'browser-image-compression'
@@ -25,7 +24,7 @@ export default function ImageConverter() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [format, setFormat] = useState<'png' | 'jpeg' | 'webp'>('png')
-  const [quality, setQuality] = useState<number>(80)
+  const [quality, setQuality] = useState<number>(0.8) // Default to Normal quality
   const [convertedImage, setConvertedImage] = useState<string | null>(null)
   const [originalSize, setOriginalSize] = useState<string>('')
   const [convertedSize, setConvertedSize] = useState<string>('')
@@ -48,18 +47,18 @@ export default function ImageConverter() {
   }, [])
 
   const handleConvert = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     if (!selectedImage) return
 
     const options = {
-      maxSizeMB: 0.9, // 900KB limit
+      maxSizeMB: 0.1,
       maxWidthOrHeight: Math.max(
         manualWidth ? parseInt(manualWidth) : Infinity,
         manualHeight ? parseInt(manualHeight) : Infinity
       ),
       useWebWorker: true,
       fileType: `image/${format}`,
-      quality: quality / 100,
+      quality: quality, // Use the selected quality
     }
 
     try {
@@ -126,16 +125,18 @@ export default function ImageConverter() {
               </SelectContent>
             </Select>
           </div>
-          <div className='flex flex-col gap-5 items-start'>
-            <Label htmlFor="quality">Quality: {quality}%</Label>
-            <Slider
-              id="quality"
-              min={1}
-              max={100}
-              step={1}
-              value={[quality]}
-              onValueChange={(value) => setQuality(value[0])}
-            />
+          <div>
+            <Label htmlFor="quality">Quality</Label>
+            <Select onValueChange={(value) => setQuality(parseFloat(value))}>
+              <SelectTrigger id="quality" className='text-[#e21d48]'>
+                <SelectValue placeholder="Select quality" />
+              </SelectTrigger>
+              <SelectContent className='text-[#e21d48]'>
+                <SelectItem value="0.5">Medium</SelectItem>
+                <SelectItem value="0.8">Normal</SelectItem>
+                <SelectItem value="1.0">Best</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -162,7 +163,7 @@ export default function ImageConverter() {
             />
           </div>
         </div>
-        <Button onClick={handleConvert} disabled={!selectedImage}>
+        <Button onClick={handleConvert} disabled={!selectedImage || !quality || !format || isLoading}>
           {isLoading ? <><AiOutlineLoading className='mr-2 h-4 w-4 animate-spin' />Converting...</> : <>Convert</>}
         </Button>
         {convertedImage && (
