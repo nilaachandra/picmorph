@@ -21,60 +21,62 @@ function formatFileSize(bytes: number): string {
 }
 
 export default function ImageConverter() {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [format, setFormat] = useState<'png' | 'jpeg' | 'webp' | null >(null)
-  const [quality, setQuality] = useState<number>(0.8) // Default to Normal quality
-  const [convertedImage, setConvertedImage] = useState<string | null>(null)
-  const [originalSize, setOriginalSize] = useState<string>('')
-  const [convertedSize, setConvertedSize] = useState<string>('')
-  const [manualWidth, setManualWidth] = useState<string>('')
-  const [manualHeight, setManualHeight] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const imageRef = useRef<HTMLImageElement>(null)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [format, setFormat] = useState<'png' | 'jpeg' | 'webp'>('png');
+  const [quality, setQuality] = useState<number>(1.0); // Default to Best quality (lossless for PNG/WebP)
+  const [convertedImage, setConvertedImage] = useState<string | null>(null);
+  const [originalSize, setOriginalSize] = useState<string>('');
+  const [convertedSize, setConvertedSize] = useState<string>('');
+  const [manualWidth, setManualWidth] = useState<string>('');
+  const [manualHeight, setManualHeight] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      setSelectedImage(file)
-      setPreviewUrl(URL.createObjectURL(file))
-      setOriginalSize(formatFileSize(file.size))
-      setConvertedImage(null)
-      setConvertedSize('')
-      setManualWidth('')
-      setManualHeight('')
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setOriginalSize(formatFileSize(file.size));
+      setConvertedImage(null);
+      setConvertedSize('');
+      setManualWidth('');
+      setManualHeight('');
     }
-  }, [])
+  }, []);
 
   const handleConvert = useCallback(async () => {
-    setIsLoading(true)
-    if (!selectedImage) return
+    setIsLoading(true);
+    if (!selectedImage) return;
 
     const options = {
-      maxSizeMB: 1,
+      maxSizeMB: 0.9, // Compress to be under 900KB if possible
       maxWidthOrHeight: Math.max(
         manualWidth ? parseInt(manualWidth) : Infinity,
         manualHeight ? parseInt(manualHeight) : Infinity
       ),
       useWebWorker: true,
       fileType: `image/${format}`,
-      quality: quality, // Use the selected quality
-    }
+      quality: quality, // Using 1.0 for lossless
+      alwaysKeepResolution: true // Keep resolution to avoid downscaling
+    };
 
     try {
-      const compressedFile = await imageCompression(selectedImage, options)
-      const reader = new FileReader()
+      const compressedFile = await imageCompression(selectedImage, options);
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setConvertedImage(reader.result as string)
-        setConvertedSize(formatFileSize(compressedFile.size))
-      }
-      reader.readAsDataURL(compressedFile)
-      setIsLoading(false)
+        setConvertedImage(reader.result as string);
+        setConvertedSize(formatFileSize(compressedFile.size));
+      };
+      reader.readAsDataURL(compressedFile);
+      setIsLoading(false);
     } catch (error) {
-      console.error('Error converting image:', error)
-      setIsLoading(false)
+      console.error('Error converting image:', error);
+      setIsLoading(false);
     }
-  }, [selectedImage, format, quality, manualWidth, manualHeight])
+  }, [selectedImage, format, quality, manualWidth, manualHeight]);
+
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
