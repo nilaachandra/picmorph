@@ -84,7 +84,7 @@ export default function ImageConverter() {
           <h1 className="text-2xl font-bold">PicMorph</h1>
         </div>
         <div className='flex items-center flex-col'>
-          <a href=''><LuGithub size={18} /></a>
+          <a href='https://github.com/nilaachandra/picmorph' target="_blank"><LuGithub size={18} /></a>
           <span className='text-xs'>⭐ on GitHub</span>
         </div>
       </nav>
