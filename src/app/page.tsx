@@ -23,7 +23,7 @@ function formatFileSize(bytes: number): string {
 export default function ImageConverter() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [format, setFormat] = useState<'png' | 'jpeg' | 'webp'>('png')
+  const [format, setFormat] = useState<'png' | 'jpeg' | 'webp' | null >(null)
   const [quality, setQuality] = useState<number>(0.8) // Default to Normal quality
   const [convertedImage, setConvertedImage] = useState<string | null>(null)
   const [originalSize, setOriginalSize] = useState<string>('')
@@ -51,7 +51,7 @@ export default function ImageConverter() {
     if (!selectedImage) return
 
     const options = {
-      maxSizeMB: 0.1,
+      maxSizeMB: 1,
       maxWidthOrHeight: Math.max(
         manualWidth ? parseInt(manualWidth) : Infinity,
         manualHeight ? parseInt(manualHeight) : Infinity
@@ -134,7 +134,6 @@ export default function ImageConverter() {
               <SelectContent className='text-[#e21d48]'>
                 <SelectItem value="0.5">Medium</SelectItem>
                 <SelectItem value="0.8">Normal</SelectItem>
-                <SelectItem value="1.0">Best</SelectItem>
               </SelectContent>
             </Select>
           </div>
